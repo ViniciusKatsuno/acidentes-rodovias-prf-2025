@@ -3,6 +3,7 @@
 # Pré-requisito: colocar datatran2025.csv em dados/brutos/
 set -euo pipefail
 cd "$(dirname "$0")"
+mkdir -p dados/brutos dados/tratados dados/resultados docs/img
 
 python scripts/01_limpeza.py dados/brutos/datatran2025.csv dados/tratados/acidentes_prf_2025_tratado.csv docs/log_limpeza.md
 python scripts/02_carga_sqlite.py dados/tratados/acidentes_prf_2025_tratado.csv dados/acidentes_prf.db

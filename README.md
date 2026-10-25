@@ -53,7 +53,7 @@ Os principais, todos tratados ou sinalizados (detalhes em `docs/log_limpeza.md`)
 
 1. Baixe o arquivo de acidentes agrupados por ocorrência de 2025 na página de [Dados Abertos da PRF](https://www.gov.br/prf/pt-br/acesso-a-informacao/dados-abertos/dados-abertos-da-prf) e salve como `dados/brutos/datatran2025.csv`.
 2. Instale as dependências: `pip install -r requirements.txt`.
-3. Rode `./executar_tudo.sh`.
+3. Rode `bash executar_tudo.sh` (crie antes a pasta `dados/brutos`, se ela não existir).
 4. Para o notebook: `jupyter lab notebooks/analise_acidentes_prf_2025.ipynb`.
 
 Os dados brutos e a base tratada não estão versionados, porque são arquivos grandes e podem ser regenerados pelos scripts. Confira as condições de uso na página da PRF antes de redistribuí-los.
