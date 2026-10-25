@@ -1,0 +1,8 @@
+# Dados brutos e banco gerado: baixe/gere com os scripts (ver README)
+dados/brutos/*
+!dados/brutos/.gitkeep
+dados/*.db
+dados/tratados/*.csv
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store

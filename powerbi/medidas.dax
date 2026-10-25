@@ -1,0 +1,85 @@
+// =====================================================================
+// Medidas DAX - Acidentes PRF 2025
+// Pré-requisito: importar dados/tratados/acidentes_prf_2025_tratado.csv
+// e renomear a tabela para "acidentes" (ver passo_a_passo.md).
+// Observação: estas medidas não foram executadas no Power BI Desktop
+// durante a montagem do projeto. Confira cada uma ao criar o painel.
+// =====================================================================
+
+// ---------- Medidas básicas ----------
+Total Acidentes = COUNTROWS ( acidentes )
+
+Total Mortos = SUM ( acidentes[mortos] )
+
+Total Feridos = SUM ( acidentes[feridos] )
+
+Acidentes Fatais =
+CALCULATE (
+    COUNTROWS ( acidentes ),
+    acidentes[classificacao_acidente] = "Com Vítimas Fatais"
+)
+
+// ---------- Letalidade ----------
+Mortos por 100 Acidentes =
+DIVIDE ( [Total Mortos], [Total Acidentes] ) * 100
+
+% Acidentes Fatais =
+DIVIDE ( [Acidentes Fatais], [Total Acidentes] )
+
+// Só mostra a taxa quando há volume mínimo (evita taxa instável com poucos casos)
+Letalidade (min. 30 acidentes) =
+IF ( [Total Acidentes] >= 30, [Mortos por 100 Acidentes], BLANK () )
+
+// ---------- Comparação com o Brasil ----------
+Letalidade Brasil =
+CALCULATE ( [Mortos por 100 Acidentes], ALL ( acidentes[uf] ) )
+
+Diferença para o Brasil (p.p.) =
+[Mortos por 100 Acidentes] - [Letalidade Brasil]
+
+// ---------- Recortes de tempo ----------
+Acidentes Madrugada (0h-5h) =
+CALCULATE ( [Total Acidentes], acidentes[hora] <= 5 )
+
+% Acidentes Madrugada =
+DIVIDE ( [Acidentes Madrugada (0h-5h)], [Total Acidentes] )
+
+Mortos Fim de Semana =
+CALCULATE ( [Total Mortos], acidentes[dia_semana] IN { "Sábado", "Domingo" } )
+
+% Mortos no Fim de Semana =
+DIVIDE ( [Mortos Fim de Semana], [Total Mortos] )
+
+// ---------- Evolução (requer a tabela Calendario) ----------
+Acidentes Mês Anterior =
+CALCULATE ( [Total Acidentes], DATEADD ( Calendario[Date], -1, MONTH ) )
+
+Variação % vs Mês Anterior =
+DIVIDE ( [Total Acidentes] - [Acidentes Mês Anterior], [Acidentes Mês Anterior] )
+
+// ---------- Tabelas e colunas calculadas ----------
+// Nova tabela (Modelagem > Nova tabela):
+Calendario =
+ADDCOLUMNS (
+    CALENDAR ( DATE ( 2025, 1, 1 ), DATE ( 2025, 12, 31 ) ),
+    "Mes", MONTH ( [Date] ),
+    "Nome do Mes", FORMAT ( [Date], "mmm" )
+)
+
+// Nova coluna na tabela acidentes (para ordenar os dias da semana):
+Ordem Dia =
+SWITCH (
+    acidentes[dia_semana],
+    "Segunda-feira", 1, "Terça-feira", 2, "Quarta-feira", 3, "Quinta-feira", 4,
+    "Sexta-feira", 5, "Sábado", 6, "Domingo", 7
+)
+
+// Nova coluna: faixa do dia, para o gráfico de horário
+Faixa Horária =
+SWITCH (
+    TRUE (),
+    acidentes[hora] <= 5, "Madrugada (0h-5h)",
+    acidentes[hora] <= 11, "Manhã (6h-11h)",
+    acidentes[hora] <= 17, "Tarde (12h-17h)",
+    "Noite (18h-23h)"
+)
